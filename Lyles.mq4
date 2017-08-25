@@ -17,6 +17,8 @@ double pips;
 int    magic;
 
 bool first = True;
+double minLot;
+double maxLot;
 
 int OnInit()
 {
@@ -24,6 +26,9 @@ int OnInit()
    pips =Point; 
    if(Digits==3||Digits==5)
       pips*=10;
+
+   minLot = MarketInfo(Symbol(), MODE_MINLOT);
+   maxLot = MarketInfo(Symbol(), MODE_MAXLOT);
    
    //#include<InitChecks.mqh>
    return(INIT_SUCCEEDED);
@@ -71,7 +76,7 @@ void enterTrade(int type){
    int err=0;
    double price=Bid,
           sl=0, 
-          tp=0,
+          tp=0, 
           lotsize = lotSize;
                     
    type = (type == OP_BUY) ? OP_SELL : OP_BUY;
@@ -83,6 +88,18 @@ void enterTrade(int type){
      lotSize += lotDelta;
      lotsize = lotSize;
    }
+   
+   if(maxLot < lotSize) {
+     lotSize = maxLot;
+     lotsize = maxLot;
+     Print("Lot size(", lotsize, ") is larger than max(", maxLot, "). Rounded to ", maxLot, ".");
+   }
+   else if(lotSize < minLot) {
+     lotSize = minLot;
+     lotsize = minLot;
+     Print("Lot size(", lotsize, ") is smaller than min(", minLot, "). Entry skipped.");
+   }
+   
           
    if(type == OP_BUY)
       price =Ask;
