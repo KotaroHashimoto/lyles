@@ -10,7 +10,8 @@ extern bool    useTrailing=false;//Do you want to use trailing stop loss?
 extern int     trailAmount=30;//Trailing amount
 extern double  stopLoss=30;//Stop loss
 extern double  takeProfit=130;//Take profit
-input  double  lotSize=0.1;//Lotsize
+input  double  lotSize=0.1;//Lot size
+extern  double lotDelta = 0.01;//Lot delta
 extern int     magicSeed=1234;//MagicNumber seed
 double pips;
 int    magic;
@@ -70,6 +71,10 @@ void enterTrade(int type){
           sl=0, 
           tp=0,
           lotsize = lotSize;
+                    
+   type = (type == OP_BUY) ? OP_SELL : OP_BUY;
+   lotsize += lotDelta;
+          
    if(type == OP_BUY)
       price =Ask;
 
@@ -196,6 +201,13 @@ void closeAll(){
                closePrice=Bid;
             else if(OrderType()==OP_SELL)
                closePrice=Ask;
+               
+            if(0 < OrderProfit()) {
+              lotDelta = MathAbs(lotDelta);
+            }
+            else {
+              lotDelta = -1.0 * MathAbs(lotDelta);
+            }
                
             if(!OrderClose(OrderTicket(),OrderLots(),closePrice,3,clrNONE)){
                err = GetLastError();
