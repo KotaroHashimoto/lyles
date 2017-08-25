@@ -10,11 +10,13 @@ extern bool    useTrailing=false;//Do you want to use trailing stop loss?
 extern int     trailAmount=30;//Trailing amount
 extern double  stopLoss=30;//Stop loss
 extern double  takeProfit=130;//Take profit
-input  double  lotSize=0.1;//Lot size
-extern  double lotDelta = 0.01;//Lot delta
+extern double  lotSize=0.1;//Lot size
+extern double lotDelta = 0.01;//Lot delta
 extern int     magicSeed=1234;//MagicNumber seed
 double pips;
 int    magic;
+
+bool first = True;
 
 int OnInit()
 {
@@ -73,7 +75,14 @@ void enterTrade(int type){
           lotsize = lotSize;
                     
    type = (type == OP_BUY) ? OP_SELL : OP_BUY;
-   lotsize += lotDelta;
+   
+   if(first) {
+     first = False;
+   }
+   else {
+     lotSize += lotDelta;
+     lotsize = lotSize;
+   }
           
    if(type == OP_BUY)
       price =Ask;
