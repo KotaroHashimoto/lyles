@@ -97,7 +97,7 @@ void enterTrade(int type){
    else if(lotSize < minLot) {
      lotSize = minLot;
      lotsize = minLot;
-     Print("Lot size(", lotsize, ") is smaller than min(", minLot, "). Entry skipped.");
+     Print("Lot size(", lotsize, ") is smaller than min(", minLot, "). Rounded to ", minLot, ".");
    }
    
           
