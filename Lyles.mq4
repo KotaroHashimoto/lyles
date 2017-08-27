@@ -9,16 +9,17 @@ extern int     slowMa=100;//Slow MA period
 extern bool    useTrailing=false;//Do you want to use trailing stop loss?
 extern int     trailAmount=30;//Trailing amount
 extern double  stopLoss=30;//Stop loss
-extern double  takeProfit=130;//Take profit
+extern double  takeProfit=30;//Take profit
 extern double  lotSize=0.1;//Lot size
-extern double lotDelta = 0.01;//Lot delta
+extern double  lotDelta = 0.01;//Lot delta
 extern int     magicSeed=1234;//MagicNumber seed
 double pips;
 int    magic;
 
-bool first = True;
 double minLot;
 double maxLot;
+
+double lastEquity;
 
 int OnInit()
 {
@@ -29,6 +30,8 @@ int OnInit()
 
    minLot = MarketInfo(Symbol(), MODE_MINLOT);
    maxLot = MarketInfo(Symbol(), MODE_MAXLOT);
+   
+   lastEquity = AccountEquity();
    
    //#include<InitChecks.mqh>
    return(INIT_SUCCEEDED);
@@ -80,14 +83,21 @@ void enterTrade(int type){
           lotsize = lotSize;
                     
    type = (type == OP_BUY) ? OP_SELL : OP_BUY;
-   
-   if(first) {
-     first = False;
+
+   double eq = AccountEquity();
+   if(lastEquity == eq) {
+     // do nothing
+   }
+   else if(lastEquity < eq) {
+     lotDelta = MathAbs(lotDelta);
+     lotSize += lotDelta;
    }
    else {
+     lotDelta = -1.0 * MathAbs(lotDelta);
      lotSize += lotDelta;
-     lotsize = lotSize;
-   }
+   }            
+   
+   lotsize = lotSize;
    
    if(maxLot < lotSize) {
      lotSize = maxLot;
@@ -103,8 +113,9 @@ void enterTrade(int type){
           
    if(type == OP_BUY)
       price =Ask;
-
-   int ticket =  OrderSend(Symbol(),type,lotsize,price,30,0,0,"EaTemplate",magic,0,Magenta); 
+   
+   lastEquity = eq;
+   int ticket = OrderSend(Symbol(),type,lotsize,price,30,0,0,"EaTemplate",magic,0,Magenta); 
    if(ticket>0)
    {
       if(OrderSelect(ticket,SELECT_BY_TICKET))
@@ -227,13 +238,6 @@ void closeAll(){
                closePrice=Bid;
             else if(OrderType()==OP_SELL)
                closePrice=Ask;
-               
-            if(0 < OrderProfit()) {
-              lotDelta = MathAbs(lotDelta);
-            }
-            else {
-              lotDelta = -1.0 * MathAbs(lotDelta);
-            }
                
             if(!OrderClose(OrderTicket(),OrderLots(),closePrice,3,clrNONE)){
                err = GetLastError();
