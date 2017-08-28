@@ -11,7 +11,7 @@ extern int     trailAmount=30;//Trailing amount
 extern double  stopLoss=30;//Stop loss
 extern double  takeProfit=30;//Take profit
 extern double  lotSize=0.1;//Lot size
-extern double  lotDelta = 0.01;//Lot delta
+extern double  lotDelta = 0.1;//Lot delta
 extern int     magicSeed=1234;//MagicNumber seed
 double pips;
 int    magic;
@@ -89,11 +89,11 @@ void enterTrade(int type){
      // do nothing
    }
    else if(lastEquity < eq) {
-     lotDelta = MathAbs(lotDelta);
+     lotDelta = -1.0 * MathAbs(lotDelta);
      lotSize += lotDelta;
    }
    else {
-     lotDelta = -1.0 * MathAbs(lotDelta);
+     lotDelta = MathAbs(lotDelta);
      lotSize += lotDelta;
    }            
    
